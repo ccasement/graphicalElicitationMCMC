@@ -1,0 +1,143 @@
+---
+title: "Prior Elicitation Results"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: pdf_document
+---
+
+```{r setup, include = FALSE} 
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE, fig.height = 3, comment = "")
+```
+
+
+<!--- user inputs -->
+## User Inputs
+```{r}
+inputs <- data.frame("." = input$data_model, row.names = "Data Model   ")
+cat(capture.output(inputs)[-1], sep = "\n")
+invisible(inputs)
+```
+
+
+<!--- elicited prior information -->
+
+<!--- joint prior -->
+## Elicited Prior -- Joint
+
+### Family
+```{r}
+cat("Normal-Inverse-Gamma", sep = "\n")
+```
+
+### Parameters
+```{r}
+cat(capture.output(bag$hyper_params_joint)[-1], sep = "\n")
+invisible(bag$hyper_params_joint)
+```
+
+
+<!--- prior for mean -->
+## Elicited Prior -- Mean
+
+### Family
+```{r}
+cat("Normal", sep = "\n")
+```
+
+### Parameters
+```{r}
+cat(capture.output(bag$hyper_params_mean)[-1], sep = "\n")
+invisible(bag$hyper_params_mean)
+```
+Note: (Sigma^2)* = (Mode of Inverse-Gamma prior on variance) / Lambda
+
+### Plot
+```{r}
+bag$p_plot_mean + 
+  theme(
+    plot.title = element_text(size = 11),
+	  axis.title = element_text(size = 11), 
+    axis.text = element_text(size = 10)
+  )
+```
+
+### Summaries
+```{r}
+cat(capture.output(bag$summaries_mean)[-1], sep = "\n")
+invisible(bag$summaries_mean)
+```
+
+
+<!--- prior for variance -->
+## Elicited Prior -- Variance
+
+### Family
+```{r}
+cat("Inverse Gamma", sep = "\n")
+```
+
+### Parameters
+```{r}
+cat(capture.output(bag$hyper_params_var)[-1], sep = "\n")
+invisible(bag$hyper_params_var)
+```
+
+### Plot
+```{r}
+bag$p_plot_var + 
+  theme(
+    plot.title = element_text(size = 11),
+	  axis.title = element_text(size = 11), 
+    axis.text = element_text(size = 10)
+  )
+```
+
+### Summaries
+```{r}
+cat(capture.output(bag$summaries_var)[-1], sep = "\n")
+invisible(bag$summaries_var)
+```
+
+
+<!--- number of selections and trace plots -->
+## Other
+
+### Number of Selections for Each Parameter
+```{r}
+# assuming no. mean selections = no. var selections
+cat(capture.output(bag$n_var_selections)[-1], sep = "\n")
+invisible(bag$n_var_selections)
+```
+
+### Trace Plots
+```{r}
+ggplot(bag$chain_normal_mean, aes(x = step, y = state)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Step", y = expression(mu)) +
+	theme(
+	  axis.title.x = element_text(size = 11, margin = margin(15, 0, 0, 0)), 
+		axis.title.y = element_text(size = 11, margin = margin(0, 10, 0, 0)),
+	  axis.text = element_text(size = 10),
+		legend.position = "none"
+	)
+
+ggplot(bag$chain_normal_var, aes(x = step, y = state)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Step", y = expression(sigma^2)) +
+	theme(
+	  axis.title.x = element_text(size = 11, margin = margin(15, 0, 0, 0)), 
+		axis.title.y = element_text(size = 11, margin = margin(0, 10, 0, 0)),
+	  axis.text = element_text(size = 10),
+		legend.position = "none"
+	)
+
+bag$trace_2d +
+	theme(
+	  axis.title.x = element_text(size = 11), 
+    axis.title.y = element_text(size = 11),
+		axis.text = element_text(size = 10),
+		legend.position = "none"
+	)
+```
+

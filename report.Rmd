@@ -1,0 +1,92 @@
+---
+title: "Prior Elicitation Results"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: pdf_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE, fig.height = 3, comment = "")
+```
+
+
+<!--- user inputs -->
+## User Inputs
+```{r}
+if(input$data_model == "Bernoulli" || input$data_model == "Poisson") {
+	inputs <- data.frame(
+	  "." = input$data_model,
+	  row.names = "Data Model   "
+	)
+} else if(input$data_model == "Normal (known variance)") {
+	inputs <- data.frame(
+	  "." = c(input$data_model, input$pop_sd),
+	  row.names = c("Data Model", "Population Std. Dev.")
+	)
+}
+cat(capture.output(inputs)[-1], sep = "\n")
+invisible(inputs)
+```
+
+
+<!--- elicited prior information -->
+## Elicited Prior
+
+### Family
+```{r}
+cat(bag$prior_fam, sep = "\n")
+```
+
+### Parameters
+```{r}
+cat(capture.output(bag$hyper_params)[-1], sep = "\n")
+invisible(bag$hyper_params)
+```
+
+### Plot
+```{r}
+bag$p_plot + 
+  theme(
+    plot.title = element_text(size = 11),
+	  axis.title = element_text(size = 11),
+    axis.text = element_text(size = 10)
+  )
+```
+
+### Summaries
+```{r, echo = FALSE}
+cat(capture.output(bag$summaries)[-1], sep = "\n")
+invisible(bag$summaries)
+```
+
+
+<!--- number of selections and trace plot -->
+## Other
+
+### Number of Selections
+```{r}
+cat(capture.output(bag$n_selections)[-1], sep = "\n")
+invisible(bag$n_selections)
+```
+
+### Trace Plot
+```{r, echo = FALSE, fig.height = 4}
+t_plot <- ggplot(bag$chain, aes(x = step, y = state)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Step") +
+  theme(
+    axis.title.x = element_text(size = 11, margin = margin(15, 0, 0, 0)), 
+    axis.title.y = element_text(size = 11, margin = margin(0, 10, 0, 0)),
+    axis.text = element_text(size = 10), 
+    legend.position = "none"
+  )
+
+if(input$data_model == "Bernoulli") {
+  t_plot + ylab("p") + ylim(c(0, 1))
+} else if(input$data_model == "Poisson"){
+  t_plot + ylab(expression(lambda))
+} else if(input$data_model == "Normal (known variance)"){
+  t_plot + ylab(expression(mu))
+}
+```
+
