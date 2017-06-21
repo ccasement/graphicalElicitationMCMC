@@ -279,18 +279,18 @@ navbarPage("Graphical Elicitation MCMC",
             actionButton("current_much_more_likely_bern", 
               label = "Much More",
       	      class = "btn btn-primary",
-              width = "95px"
+              width = "92px"
             ),
-        	  style = "padding-left: 5%",
+        	  #style = "padding-left: 5%",
             actionButton("current_more_likely_bern",
               label = "25x More", 
               class = "btn btn-primary", 
-              width = "95px"
+              width = "82px"
             ),
             actionButton("current_little_more_likely_bern",
               label = "3x More",
       	      class = "btn btn-primary",
-              width = "95px"
+              width = "82px"
             )
         	),
       	  column(2,
@@ -610,27 +610,24 @@ navbarPage("Graphical Elicitation MCMC",
         expected and unexpected characteristics in the plots. This training 
         process is known as the Rorschach procedure."),
       p("Note: there are no selections to be made at this time."),
-      p("Additional Options:"),
-      p("(1) To see new sets of graphs, click the 'Generate New Graphs' button."),
-      p("(2) To change the size of the hypothetical datasets for the training
-        graphs, click the checkbox at the bottom of the screen and update the 
-        number of observations."),
+      p("Additional option: to see new sets of graphs, click the 'Generate New 
+        Graphs' button."),
       hr()
     ),
     
     column(4,
       # select graphs
       h3("Select Graphs"),
-      p("Five datasets, each with 100 observations, are plotted; these are based 
+      p("Two datasets, each with 100 observations, are plotted; these are based 
         on the inputs you specified in the 'Select Model' tab. You must select 
         one of five options: (1) the proposed graph is more likely than the 
         current graph, (2) the proposed and current graphs are equally likely, 
         (3) the current graph is 3 times more likely than the proposed graph, 
         (4) the current graph is 25 times more likely than the proposed graph, 
-        or (5) the current graph is 10^6 times more likely than the proposed 
-        graph. Once you select an option, two new graphs will be displayed. The 
-        number of selections you must make is specified in the top-right corner 
-        of the screen."),
+        or (5) the current graph is far more likely than the proposed graph. 
+        Once you select an option, two new graphs will be displayed. The number
+        of selections you must make is specified in the top-right corner of the 
+        screen."),
       p("Note: you may not see any graphs that truly represent your beliefs,
         particularly at the beginning of the process. Choose the best option. 
         The algorithm may need a few selections to reach the point where you see 
@@ -651,8 +648,7 @@ navbarPage("Graphical Elicitation MCMC",
       p("(2) Change Burn-in: allows you to discard the first few values (you set
         how many); defaulted to 0."),
       p("(3) Plot Options: allows you to add a kernel density estimate (KDE) of 
-        the accepted parameter values as well as change the x-axis values for 
-        the density plot."),
+        the accepted parameter values."),
       hr()
     ),
     
@@ -660,20 +656,20 @@ navbarPage("Graphical Elicitation MCMC",
       # view trace plot
       h3("View Trace Plot"),
       p("After making the specified number of selections, you can view a plot of 
-        the parameter values at each stage: proportions for a Bernoulli data 
-        model, rates for a Poisson model, means for a Normal model with known 
-        variance, and means and variances for a Normal model with unknown 
-        variance)."),
+        the accepted parameter values at each step: proportions for a Bernoulli 
+        data model, rates for a Poisson model, means for a Normal model with 
+        known variance, and means and variances for a Normal model with unknown 
+        variance."),
       hr(),
       
       # download results
       h3("Download Results"),
       p("If you want to save your results, you can download two files:"),
       p("(1) a report that contains all of your inputs as well as all output 
-        from the 'Compute Prior' and 'View History Plot' tabs. Three file types
+        from the 'Compute Prior' and 'View Trace Plot' tabs. Three file types
         (PDF, Word, and HTML) are available for this document, which is created
-        using R Markdown, and"),
-      p("(2) a CSV file that contains all of the values used by the algorithm.")
+        using R Markdown."),
+      p("(2) a CSV file that contains all of the values used by the algorithm")
     )
   ),
   
@@ -696,7 +692,7 @@ navbarPage("Graphical Elicitation MCMC",
       h4("About the App"),
       p("This tool elicits prior distributions for Bayesian analyses by drawing
         on recent developments in the graphical inference literature on visual 
-        hypothesis testing in addition to Metropolis-Hastings sampling."),
+        hypothesis testing in addition to Metropolis MCMC."),
       br(),
       
       # contact info

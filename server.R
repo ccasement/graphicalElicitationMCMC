@@ -1,10 +1,8 @@
 
 library(shiny)
 library(ggplot2); theme_set(theme_bw(18))
-library(scales)
 library(invgamma)
 library(rmarkdown)
-
 
 
 ##### shinyServer
@@ -14,6 +12,7 @@ shinyServer(function(input, output, session) {
   
   ##### global data
   ########################################
+  
   `%is_in_interval%` <- function(x, y) y[1] <= x & x <= y[2]
   `%is_not_in_interval%` <- function(x, y) !(y[1] <= x & x <= y[2])
   
@@ -55,7 +54,8 @@ shinyServer(function(input, output, session) {
   
   ##### define proposal generating function
   ########################################
-  generate_proposal <- function(current, data_model){
+  
+  generate_proposal <- function(current, data_model) {
     
     # define parameter space and set proposal std dev
     if(data_model != "Normal (unknown variance)") {
@@ -74,11 +74,11 @@ shinyServer(function(input, output, session) {
       # mean case
       if(bag$mean_counter == bag$var_counter) {
         parameter_space <- c(-Inf, Inf)
-        proposal_sd <- 7
+        proposal_sd <- 2*sqrt(bag$init_sd)  # defined later in observeEvent(input$set_inputs)
       } else {       
         # variance case
         parameter_space <- c(0, Inf)
-        proposal_sd <- 50                                               # UPDATE these****
+        proposal_sd <- bag$init_sd^2
       }
     }
 
@@ -95,6 +95,7 @@ shinyServer(function(input, output, session) {
   
   ##### define dataset generating functions
   ########################################
+  
   generate_data <- function(action) {
     
     u <- runif(bag$N)
@@ -132,6 +133,7 @@ shinyServer(function(input, output, session) {
   
   ##### construct and initialize reactive stuff
   ############################################################
+  
   bag <- reactiveValues()
   
   # default inputs
@@ -159,6 +161,7 @@ shinyServer(function(input, output, session) {
 
   ##### update chain
   ############################################################  
+  
   update_chain <- function(next_state) {
 
       # all cases except normal (unknown var)
@@ -195,6 +198,7 @@ shinyServer(function(input, output, session) {
   
   ##### generate training plots
   ###########################################################
+  
   make_training_plots <- function() {
   	
   	# number of plots
@@ -244,7 +248,7 @@ shinyServer(function(input, output, session) {
       	scale_x_continuous(NULL)
     	
   	} else {
-			training_datasets <- lapply(seq_along(samples), function(samples){
+			training_datasets <- lapply(seq_along(samples), function(samples) {
 				data.frame(
 				  x = rnorm(bag$N, input$training_mean2, input$training_sd2), 
 				  samp = samples, 
@@ -273,7 +277,8 @@ shinyServer(function(input, output, session) {
     bag$prior_fam <- switch(input$data_model,
       "Bernoulli" = "Beta",
       "Poisson" = "Gamma",
-      "Normal (known variance)" = "Normal"
+      "Normal (known variance)" = "Normal",
+      "Normal (unknown variance)" = "Normal-Inverse-Gamma"
     )
   	
   	output$prior_family <- renderText(bag$prior_fam)
@@ -417,18 +422,18 @@ shinyServer(function(input, output, session) {
   #########################################################
   
   # bernoulli case
-  observeEvent(input$proposed_more_likely_bern, transition(1))             # a =    100%
-  observeEvent(input$equally_likely_bern, transition(1))                   # a =    100%
-  observeEvent(input$current_little_more_likely_bern, transition(0.34))    # a =     34%
-  observeEvent(input$current_more_likely_bern, transition(0.25))           # a =      4%
-  observeEvent(input$current_much_more_likely_bern, transition(1e-6))      # a = 0.0001%
+  observeEvent(input$proposed_more_likely_bern, transition(1))          # a =    100%
+  observeEvent(input$equally_likely_bern, transition(1))                # a =    100%
+  observeEvent(input$current_little_more_likely_bern, transition(0.34)) # a =     34%
+  observeEvent(input$current_more_likely_bern, transition(0.04))        # a =      4%
+  observeEvent(input$current_much_more_likely_bern, transition(1e-6))   # a = 0.0001%
   
   # non-bernoulli cases
-  observeEvent(input$proposed_more_likely, transition(1))             # a =    100%
-  observeEvent(input$equally_likely, transition(1))                   # a =    100%
-  observeEvent(input$current_little_more_likely, transition(0.34))    # a =     34%
-  observeEvent(input$current_more_likely, transition(0.25))           # a =      4%
-  observeEvent(input$current_much_more_likely, transition(1e-6))      # a = 0.0001%
+  observeEvent(input$proposed_more_likely, transition(1))           # a =    100%
+  observeEvent(input$equally_likely, transition(1))                 # a =    100%
+  observeEvent(input$current_little_more_likely, transition(0.34))  # a =     34%
+  observeEvent(input$current_more_likely, transition(0.04))         # a =      4%
+  observeEvent(input$current_much_more_likely, transition(1e-6))    # a = 0.0001%
     
 
   ##### make the two plots
@@ -469,6 +474,7 @@ shinyServer(function(input, output, session) {
 
   ##### print selection number
   ########################################
+  
   output$selections_bern <- renderText({
     paste(bag$counter, "/", bag$total_bern_selections)
   })
@@ -477,13 +483,14 @@ shinyServer(function(input, output, session) {
     if(input$data_model != "Normal (unknown variance)") {
       paste(bag$counter, "/", bag$total_selections)
     } else {
-      paste(bag$mean_counter + bag$var_counter, "/", bag$total_selections)
+      paste(bag$mean_counter + bag$var_counter, "/", 2*bag$total_selections)
     }
   })
 
   
   ##### change burn-in if user selects that option
   ########################################
+  
   observeEvent(input$burn_in, bag$burnin <- input$new_burnin)
   
   observeEvent(input$burn_in_normal,
@@ -493,6 +500,7 @@ shinyServer(function(input, output, session) {
   
   ##### fit prior
   ########################################
+  
   compute_hypers <- function() {
     
     # remove burn-in
@@ -514,7 +522,7 @@ shinyServer(function(input, output, session) {
         method = "L-BFGS-B", lower = lower_limit, upper = c(Inf, Inf)
       )$par
     } else {
-      # remove burn-in                                         # change no. of selections **
+      # remove burn-in
       bag$chain_keep_normal_mean <- bag$chain_normal_mean[-(1:(bag$burnin_normal + 1)), ]
       bag$chain_keep_normal_var <- bag$chain_normal_var[-(1:(bag$burnin_normal + 1)), ]
       
@@ -523,8 +531,7 @@ shinyServer(function(input, output, session) {
         bag$chain_keep_normal_var$state
       )
       
-      # calculate hyperparameters for mean
-      lower_limit <- c(-Inf, 0.05, 0.05, 0.05)
+      lower_limit <- c(-Inf, 0.05, 2.05, 0.05)
       
       bag$th_hat <- optim(rep(10, 4),
         function(th) {
@@ -692,8 +699,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  # print number of selections -- total, burn-in, and kept for all cases except 
-  # normal (unknown var)
+  # print number of selections for all cases except normal (unknown var)
   output$all_selections <- renderPrint({
   	bag$n_selections <<- data.frame(
 			"." = c(nrow(bag$chain[-1, ]), bag$burnin, nrow(bag$chain_keep)),
@@ -724,7 +730,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  ##### plot elicited prior and KDE based on selected params
+  ##### plot elicited prior based on selected params
   ########################################
   
   output$prior_plot <- renderPlot({
@@ -921,16 +927,19 @@ shinyServer(function(input, output, session) {
   ########################################
   
   output$download_report <- downloadHandler(
-    filename = function(){
+    filename = function() {
       paste("elicitation-results", sep = ".", switch(
         input$format, PDF = "pdf", HTML = "html", Word = "docx"
       ))
     },
     
     content = function(file){
-  		if(input$data_model != "Normal (unknown variance)") markdown_file <- "report.Rmd"
-  		else markdown_file <- "report2.Rmd"
-  		
+  		if(input$data_model != "Normal (unknown variance)") {
+  		  markdown_file <- "report.Rmd"
+  		} else {
+  		  markdown_file <- "report2.Rmd"
+  		}
+      
   		src <- normalizePath(markdown_file)
       
       # temporarily switch to the temp dir, in case you do not have write
@@ -951,8 +960,9 @@ shinyServer(function(input, output, session) {
   
   ##### create csv file of selected parameters
   ########################################
+  
   output$download_selected <- downloadHandler(
-    filename = function(){
+    filename = function() {
       paste("elicitation-selected-values", ".csv", sep = "")
     },
     
