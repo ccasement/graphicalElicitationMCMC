@@ -264,8 +264,10 @@ shinyServer(function(input, output, session) {
 
   	# return plot
   	g + ylab("Count") + 
-  		theme(axis.title.x = element_text(margin = margin(15, 0, 0, 0)), 
-    		axis.title.y = element_text(margin = margin(0, 10, 0, 0)))
+  		theme(
+  		  axis.title.x = element_text(margin = margin(15, 0, 0, 0)), 
+    		axis.title.y = element_text(margin = margin(0, 10, 0, 0))
+  		)
   }
   
 
@@ -510,9 +512,9 @@ shinyServer(function(input, output, session) {
     # calculate hyperparameters using MLE
     if(input$data_model != "Normal (unknown variance)") {
       if(input$data_model == "Bernoulli" || input$data_model == "Poisson") {
-        lower_limit <- c(0.05, 0.05)
+        lower_limit <- c(0.01, 0.01)
       } else if(input$data_model == "Normal (known variance)") {
-        lower_limit <- c(-Inf, 0.05)
+        lower_limit <- c(-Inf, 0.01)
       }
       
       bag$th_hat <- optim(c(10, 10),
@@ -531,7 +533,7 @@ shinyServer(function(input, output, session) {
         bag$chain_keep_normal_var$state
       )
       
-      lower_limit <- c(-Inf, 0.05, 2.05, 0.05)
+      lower_limit <- c(-Inf, 0.01, 0.01, 0.01)
       
       bag$th_hat <- optim(rep(10, 4),
         function(th) {
