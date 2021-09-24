@@ -2,7 +2,7 @@
 library(shiny)
 
 
-##### data
+##### data models
 ############################################################
 
 data_model_choices <- list(
@@ -23,13 +23,11 @@ navbarPage("Graphical Elicitation MCMC",
   
   tabPanel("Main", icon = icon("home"),
     
-  #  column(11, offset = 0,      # No. of columns app takes on screen
-      
     navlistPanel(
       
       ##### select model
       ########################################
-      tabPanel("Select Model", icon = icon("sign-in"),
+      tabPanel("Select Model", icon = icon("sign-in-alt"),
         
         column(4,
           column(10,
@@ -76,7 +74,7 @@ navbarPage("Graphical Elicitation MCMC",
         		
         		br(),
         		p("What is a typical value for the measurement (approximately)?"),
-        		numericInput("init_value", label = "Typical Value", 50L, width = "50%")
+        		numericInput("init_value", label = "Typical Value", 100L, width = "50%")
         	),
         	
       		conditionalPanel(
@@ -142,7 +140,7 @@ navbarPage("Graphical Elicitation MCMC",
           
           column(4,
             column(12,
-              numericInput("training_rate", label = "Typical Value", 25L, 
+              numericInput("training_rate", label = "Typical Value", 100L, 
                 width = "60%")
             ),
             
@@ -370,7 +368,7 @@ navbarPage("Graphical Elicitation MCMC",
       
       ##### compute prior
       ########################################
-      tabPanel("Compute Prior", icon = icon("flash"),
+      tabPanel("Compute Prior", icon = icon("bolt"),
                
         conditionalPanel(
           condition = "input.data_model != 'Normal (unknown variance)'",
@@ -520,7 +518,7 @@ navbarPage("Graphical Elicitation MCMC",
       
       ##### view trace plot
       ########################################
-      tabPanel("View Trace Plot", icon = icon("line-chart"),
+      tabPanel("View Trace Plot", icon = icon("chart-line"),
         conditionalPanel(
         	condition = "input.data_model != 'Normal (unknown variance)'",
         		
@@ -683,9 +681,16 @@ navbarPage("Graphical Elicitation MCMC",
       
       # information about the developers
       h4("Developers"),
-      p("This tool was developed by Chris Casement (Ph.D. candidate) and David 
-        Kahle (Associate Professor), both of the Department of Statistical 
-        Science at Baylor University."),
+      p("This tool was developed by:"),
+      tags$ul(
+        tags$li(HTML("Chris Casement &#8211 Assistant Professor in the Department 
+          of Mathematics at Fairfield University, and"
+        )),
+        tags$li(HTML("David Kahle &#8211 Associate Professor in the Department of 
+          Statistical Science at Baylor University."
+        ))
+      ),
+      
       br(),
       
       # information about the app
@@ -702,11 +707,13 @@ navbarPage("Graphical Elicitation MCMC",
       br(),
       
       # copyright statement
-      p("Copyright (c) 2017 Christopher J. Casement & David J. Kahle."),
+      p("Copyright \uA9 2017-2021 Christopher J. Casement & David J. Kahle."),
       p("The license statement can be found", 
         a("here.", href = "https://opensource.org/licenses/MIT", target = "_blank")
       )
     )
   )
 ) # end navbarPage()
+
+
 
